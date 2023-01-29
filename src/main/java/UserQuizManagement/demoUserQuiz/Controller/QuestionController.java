@@ -5,6 +5,7 @@ import UserQuizManagement.demoUserQuiz.Entity.Questions;
 import UserQuizManagement.demoUserQuiz.Service.QuestionService;
 import UserQuizManagement.demoUserQuiz.Utils.Responces;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-    @GetMapping(path="/checkanswers")
+    /*@GetMapping(path="/checkanswers")
     public int checkAnswers(){
 
         Long user_id=null;
@@ -42,12 +43,25 @@ public class QuestionController {
 
         int marks =questionService.checkAnswer(user_id,res);
         return marks;
+    }*/
+
+    @GetMapping(path="/checkanswers")
+    public int checkAnswers(){
+
+        Long userId=1L;
+        Long questionId=8L;
+        int givenAnswer=2;
+
+        int marks = questionService.checkAnswer(userId,questionId,givenAnswer);
+
+        return marks;
+
     }
 
-    @GetMapping(path="/getquestions/{subject_id}")
-    public List<Questions> getQuestions(@PathVariable Long subject_id ){
+    @GetMapping(path="/getquestions/{subject_id}/{offset}")
+    public Questions getQuestions(@PathVariable Long subject_id,@PathVariable int offset ){
 
-        return questionService.generateQestions(subject_id);
+        return questionService.generateQuestions(subject_id,offset);
 
     }
 

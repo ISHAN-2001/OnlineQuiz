@@ -1,6 +1,7 @@
 package UserQuizManagement.demoUserQuiz.Repository;
 
 import UserQuizManagement.demoUserQuiz.Entity.Questions;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,5 +17,8 @@ public interface QuestionRepository extends JpaRepository<Questions,Long> {
 
     @Query("SELECT correctAnswer FROM Questions q where q.questionId=?1")
     public List<Integer> findByquestionId(Long questionId);
+
+
+    public List<Questions> findBysubjectId(Long subjectId, PageRequest pg);
 
 }
