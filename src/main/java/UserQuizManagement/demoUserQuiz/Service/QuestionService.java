@@ -5,6 +5,8 @@ import UserQuizManagement.demoUserQuiz.Entity.Questions;
 import UserQuizManagement.demoUserQuiz.Repository.QuestionRepository;
 import UserQuizManagement.demoUserQuiz.Utils.Responces;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,12 +32,12 @@ public class QuestionService {
 
     }
 
-    public int checkAnswer(Long user_id, List<Responces> responces)  {
-        /*
+    /*public int checkAnswerList(Long user_id, List<Responces> responces)  {
+        *//*
          Recieves: user_id , responce object array.{question_id,given_ans }
          Action: checks answer and RETURNS marks.
          Return marks(int);
-         */
+         *//*
         int marks=0;
 
         for (Responces responce1 : responces) {
@@ -53,21 +55,57 @@ public class QuestionService {
 
         System.out.println();
         return marks;
+    }*/
+
+    public int checkAnswer(Long userId,Long questionId, int givenAnswer){
+
+        List<Integer> correctAnswerList = questionRepository.findByquestionId(questionId);
+
+        Integer correctAnswer= correctAnswerList.get(0);
+
+        int marks=0;
+
+        if(correctAnswer==givenAnswer){
+            marks=1;
+        }
+
+        return marks;
+
     }
 
 
-    public List<Questions> generateQestions(Long SubjectId){
-        /*
+
+
+    /*public List<Questions> generateQestionsList(Long SubjectId){
+        *//*
         Recieves: SubjectId
         Action: Generates (10/20) random questions
         Return: List<Questions>
-         */
+         *//*
 
         return questionRepository.findBysubjectId(SubjectId);
 
+    }*/
+
+    public Questions generateQuestions(Long subjectId,int offset){
+
+
+        //Page<Questions> question=  questionRepository.findAll(PageRequest.of(offset,1));
+
+        List<Questions> questionList = questionRepository.findBysubjectId(subjectId,PageRequest.of(offset,1));
+
+        Questions question = questionList.get(0);
+
+
+        System.out.println(question);
+
+        return question;
     }
+
 
     public List<Questions> getAllQuestions() {
         return  questionRepository.findAll();
     }
+
+
 }
