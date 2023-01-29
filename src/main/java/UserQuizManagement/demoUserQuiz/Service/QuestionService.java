@@ -1,14 +1,14 @@
 package UserQuizManagement.demoUserQuiz.Service;
 
-import UserQuizManagement.demoUserQuiz.CustomException;
 import UserQuizManagement.demoUserQuiz.Entity.Questions;
+import UserQuizManagement.demoUserQuiz.Entity.Score;
 import UserQuizManagement.demoUserQuiz.Repository.QuestionRepository;
-import UserQuizManagement.demoUserQuiz.Utils.Responces;
+import UserQuizManagement.demoUserQuiz.Repository.ScoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +17,9 @@ public class QuestionService {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    @Autowired
+    private ScoreRepository scoreRepository;
 
     public void addquestion(Questions question){
         /*
@@ -32,8 +35,63 @@ public class QuestionService {
 
     }
 
+
+
+    @Transactional
+    public int checkAnswer(Long userId,Long questionId, int givenAnswer){
+        /*
+        WARNING: same userId,questionId,givenAnswer database score will update by 1...
+        questionId column not present in Scores Table... Needs care from frontend or caller function :)
+         */
+
+        List<Questions> quesstionInList = questionRepository.findByquestionId(questionId);
+
+        Questions question = quesstionInList.get(0);
+
+        int marks=0;
+
+        if(question.getCorrectAnswer()==givenAnswer){
+            marks=1;
+            List<Score> scores = scoreRepository.findScore(userId, question.getSubjectId());
+            if(scores.size()==0){
+                scoreRepository.save(new Score(userId,question.getSubjectId(),1L));
+            }
+            else {
+                Score score = scores.get(0);
+                score.setScore(score.getScore() + 1);
+            }
+        }
+
+        return marks;
+
+    }
+
+
+    public Questions generateQuestions(Long subjectId,int offset){
+
+        Questions question = null;
+        try {
+            List<Questions> questionList = questionRepository.findBysubjectId(subjectId, PageRequest.of(offset, 1));
+            question = questionList.get(0);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            System.out.println("Offset more than questions");
+        }
+
+        //System.out.println(question);
+
+        return question;
+    }
+
+
+    public List<Questions> getAllQuestions() {
+        return  questionRepository.findAll();
+    }
+
+    // METHODS NOT USED
+
     /*public int checkAnswerList(Long user_id, List<Responces> responces)  {
-        *//*
+     *//*
          Recieves: user_id , responce object array.{question_id,given_ans }
          Action: checks answer and RETURNS marks.
          Return marks(int);
@@ -57,26 +115,9 @@ public class QuestionService {
         return marks;
     }*/
 
-    public int checkAnswer(Long userId,Long questionId, int givenAnswer){
+        /* NOT USED: ARRAY IMPLEMENTATION :-)
 
-        List<Integer> correctAnswerList = questionRepository.findByquestionId(questionId);
-
-        Integer correctAnswer= correctAnswerList.get(0);
-
-        int marks=0;
-
-        if(correctAnswer==givenAnswer){
-            marks=1;
-        }
-
-        return marks;
-
-    }
-
-
-
-
-    /*public List<Questions> generateQestionsList(Long SubjectId){
+    public List<Questions> generateQestionsList(Long SubjectId){
         *//*
         Recieves: SubjectId
         Action: Generates (10/20) random questions
@@ -86,26 +127,5 @@ public class QuestionService {
         return questionRepository.findBysubjectId(SubjectId);
 
     }*/
-
-    public Questions generateQuestions(Long subjectId,int offset){
-
-
-        //Page<Questions> question=  questionRepository.findAll(PageRequest.of(offset,1));
-
-        List<Questions> questionList = questionRepository.findBysubjectId(subjectId,PageRequest.of(offset,1));
-
-        Questions question = questionList.get(0);
-
-
-        System.out.println(question);
-
-        return question;
-    }
-
-
-    public List<Questions> getAllQuestions() {
-        return  questionRepository.findAll();
-    }
-
 
 }

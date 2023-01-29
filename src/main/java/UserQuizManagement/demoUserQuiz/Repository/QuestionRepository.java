@@ -15,8 +15,8 @@ public interface QuestionRepository extends JpaRepository<Questions,Long> {
     public List<Questions> findBysubjectId(Long subjectId);
 
 
-    @Query("SELECT correctAnswer FROM Questions q where q.questionId=?1")
-    public List<Integer> findByquestionId(Long questionId);
+    @Query("SELECT q FROM Questions q where q.questionId=?1")
+    public List<Questions> findByquestionId(Long questionId);
 
 
     public List<Questions> findBysubjectId(Long subjectId, PageRequest pg);

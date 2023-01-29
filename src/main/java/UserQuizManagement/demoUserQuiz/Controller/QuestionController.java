@@ -30,27 +30,8 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-    /*@GetMapping(path="/checkanswers")
-    public int checkAnswers(){
-
-        Long user_id=null;
-        List<Responces> res = new ArrayList<>();
-
-        res.add(new Responces(8l,2));
-        res.add(new Responces(9l,3));
-        res.add(new Responces(10l,4));
-
-
-        int marks =questionService.checkAnswer(user_id,res);
-        return marks;
-    }*/
-
-    @GetMapping(path="/checkanswers")
-    public int checkAnswers(){
-
-        Long userId=1L;
-        Long questionId=8L;
-        int givenAnswer=2;
+    @GetMapping(path="/checkanswers/{userId}/{questionId}/{givenAnswer}")
+    public int checkAnswers(@PathVariable Long userId,@PathVariable Long questionId,@PathVariable int givenAnswer){
 
         int marks = questionService.checkAnswer(userId,questionId,givenAnswer);
 
@@ -64,6 +45,22 @@ public class QuestionController {
         return questionService.generateQuestions(subject_id,offset);
 
     }
+
+    /* NOT USED...
+    @GetMapping(path="/checkanswers")
+    public int checkAnswers(){
+
+        Long user_id=null;
+        List<Responces> res = new ArrayList<>();
+
+        res.add(new Responces(8l,2));
+        res.add(new Responces(9l,3));
+        res.add(new Responces(10l,4));
+
+
+        int marks =questionService.checkAnswer(user_id,res);
+        return marks;
+    }*/
 
 
 
