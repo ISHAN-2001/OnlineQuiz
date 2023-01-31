@@ -54,11 +54,11 @@ public class QuestionService {
             marks=1;
             List<Score> scores = scoreRepository.findScore(userId, question.getSubjectId());
             if(scores.size()==0){
-                scoreRepository.save(new Score(userId,question.getSubjectId(),1L));
+                scoreRepository.save(new Score(userId,question.getSubjectId(),10L));
             }
             else {
                 Score score = scores.get(0);
-                score.setScore(score.getScore() + 1);
+                score.setScore(score.getScore() + 10L);
             }
         }
 
@@ -88,9 +88,16 @@ public class QuestionService {
         return  questionRepository.findAll();
     }
 
+    public void saveAllQuestions(List<Questions> example) {
+
+        questionRepository.saveAll(example);
+
+    }
+
     // METHODS NOT USED
 
-    /*public int checkAnswerList(Long user_id, List<Responces> responces)  {
+    /*  //ARRAY IMPLEMENTATION
+    public int checkAnswerList(Long user_id, List<Responces> responces)  {
      *//*
          Recieves: user_id , responce object array.{question_id,given_ans }
          Action: checks answer and RETURNS marks.
