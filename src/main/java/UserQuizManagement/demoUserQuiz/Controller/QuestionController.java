@@ -89,6 +89,11 @@ public class QuestionController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
     }
 
+    @GetMapping("/endquiz/{userId}")
+    public void endQuiz(@PathVariable Long userId){
+        questionService.endthisQuiz(userId);
+    }
+
     /* NOT USED...
     @GetMapping(path="/checkanswers")
     public int checkAnswers(){

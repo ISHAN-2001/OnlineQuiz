@@ -9,7 +9,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -20,6 +22,13 @@ public class QuestionService {
 
     @Autowired
     private ScoreRepository scoreRepository;
+
+    Map<Long,Score> totalanswermap; //Replace with sessionId
+
+    QuestionService(){
+        totalanswermap= new HashMap<>();
+    }
+
 
     public void addquestion(Questions question){
         /*
@@ -37,12 +46,8 @@ public class QuestionService {
 
 
 
-    @Transactional
+
     public int checkAnswer(Long userId,Long questionId, int givenAnswer){
-        /*
-        WARNING: same userId,questionId,givenAnswer database score will update by 1...
-        questionId column not present in Scores Table... Needs care from frontend or caller function :)
-         */
 
         List<Questions> quesstionInList = questionRepository.findByquestionId(questionId);
 
@@ -52,14 +57,19 @@ public class QuestionService {
 
         if(question.getCorrectAnswer()==givenAnswer){
             marks=1;
-            List<Score> scores = scoreRepository.findScore(userId, question.getSubjectId());
-            if(scores.size()==0){
-                scoreRepository.save(new Score(userId,question.getSubjectId(),10L));
+            Score currentScore;
+            if(totalanswermap.containsKey(userId)){
+                currentScore = totalanswermap.get(userId);
+                currentScore.setScore(currentScore.getScore()+10);
             }
-            else {
-                Score score = scores.get(0);
-                score.setScore(score.getScore() + 10L);
+            else{
+                currentScore = new Score(userId, question.getSubjectId(), 10L);
             }
+            totalanswermap.put(userId,currentScore);
+
+            System.out.println("Current Score:"+currentScore.getScore());
+        }else{
+            System.out.println("Wrong Answer");
         }
 
         return marks;
@@ -92,6 +102,23 @@ public class QuestionService {
 
         questionRepository.saveAll(example);
 
+    }
+
+    @Transactional
+    public void endthisQuiz(Long userId) {
+        Score finalScore = totalanswermap.get(userId);
+
+        List<Score> scoreInList = scoreRepository.findByuserId(userId);
+
+        if(scoreInList.size()==0){
+            scoreRepository.save(finalScore);
+        }
+        else{
+            Score previousScore = scoreInList.get(0);
+            previousScore.setScore(finalScore.getScore());
+        }
+
+        totalanswermap.remove(userId);
     }
 
     // METHODS NOT USED
