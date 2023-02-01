@@ -13,8 +13,4 @@ import java.util.List;
 @Repository
 public interface ScoreRepository extends JpaRepository<Score, ScoreId> {
 
-    @Query("SELECT s from Score s where s.userId=?1 AND s.subjectId=?2")
-    public List<Score> findScore(Long userId, Long subjectId);
-
-    List<Score> findByuserId(Long userId);
 }

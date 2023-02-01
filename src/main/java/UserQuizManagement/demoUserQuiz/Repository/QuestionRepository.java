@@ -21,4 +21,5 @@ public interface QuestionRepository extends JpaRepository<Questions,Long> {
 
     public List<Questions> findBysubjectId(Long subjectId, PageRequest pg);
 
+    int countBysubjectId(Long subjectId);
 }

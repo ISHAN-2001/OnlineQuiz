@@ -1,18 +1,18 @@
 package UserQuizManagement.demoUserQuiz.Service;
 
+import UserQuizManagement.demoUserQuiz.CustomException;
 import UserQuizManagement.demoUserQuiz.Entity.Questions;
 import UserQuizManagement.demoUserQuiz.Entity.Score;
 import UserQuizManagement.demoUserQuiz.Repository.QuestionRepository;
 import UserQuizManagement.demoUserQuiz.Repository.ScoreRepository;
+import UserQuizManagement.demoUserQuiz.Utils.QuestionHelper;
+import UserQuizManagement.demoUserQuiz.Utils.UserSubjectHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class QuestionService {
@@ -23,12 +23,11 @@ public class QuestionService {
     @Autowired
     private ScoreRepository scoreRepository;
 
-    Map<Long,Score> totalanswermap; //Replace with sessionId
+    Map<UserSubjectHelper, QuestionHelper> questionMap;
 
-    QuestionService(){
-        totalanswermap= new HashMap<>();
+    public QuestionService(){
+        questionMap = new HashMap<>();
     }
-
 
     public void addquestion(Questions question){
         /*
@@ -47,7 +46,7 @@ public class QuestionService {
 
 
 
-    public int checkAnswer(Long userId,Long questionId, int givenAnswer){
+    public int checkAnswer(Long questionId, int givenAnswer){
 
         List<Questions> quesstionInList = questionRepository.findByquestionId(questionId);
 
@@ -56,18 +55,8 @@ public class QuestionService {
         int marks=0;
 
         if(question.getCorrectAnswer()==givenAnswer){
-            marks=1;
-            Score currentScore;
-            if(totalanswermap.containsKey(userId)){
-                currentScore = totalanswermap.get(userId);
-                currentScore.setScore(currentScore.getScore()+10);
-            }
-            else{
-                currentScore = new Score(userId, question.getSubjectId(), 10L);
-            }
-            totalanswermap.put(userId,currentScore);
+            marks=10;
 
-            System.out.println("Current Score:"+currentScore.getScore());
         }else{
             System.out.println("Wrong Answer");
         }
@@ -77,7 +66,37 @@ public class QuestionService {
     }
 
 
-    public Questions generateQuestions(Long subjectId,int offset){
+    public Questions generateQuestions(Long userId, Long subjectId) throws CustomException {
+
+        UserSubjectHelper userSubject = new UserSubjectHelper(userId,subjectId);
+
+        if(!questionMap.containsKey(userSubject)){ //user-subject not present
+            int totalQuestions = questionRepository.countBysubjectId(subjectId);
+            QuestionHelper questionHelper = new QuestionHelper(totalQuestions);
+            questionMap.put(userSubject,questionHelper);
+
+            if(totalQuestions<10){
+                throw new IllegalStateException("Number of questions should be atleast 10");
+            }
+        }
+        else{  // user-subeject present
+            QuestionHelper questionHelper =questionMap.get(userSubject);
+            questionHelper.setQuestionIndex(questionHelper.getQuestionIndex()+1);
+            questionMap.put(userSubject,questionHelper);
+            if(questionHelper.getQuestionIndex()>=10){
+
+                questionMap.remove(userSubject);
+                throw new CustomException("Attempted more than 10 questions");
+            }
+        }
+
+        System.out.println("INSIDE FUNCTION");
+
+        QuestionHelper questionHelper = questionMap.get(userSubject);
+
+        int offset = questionHelper.getPageNo()*questionHelper.getPageSize()
+                 + questionHelper.getOffset().get(questionHelper.getQuestionIndex());
+
 
         Questions question = null;
         try {
@@ -104,22 +123,6 @@ public class QuestionService {
 
     }
 
-    @Transactional
-    public void endthisQuiz(Long userId) {
-        Score finalScore = totalanswermap.get(userId);
-
-        List<Score> scoreInList = scoreRepository.findByuserId(userId);
-
-        if(scoreInList.size()==0){
-            scoreRepository.save(finalScore);
-        }
-        else{
-            Score previousScore = scoreInList.get(0);
-            previousScore.setScore(finalScore.getScore());
-        }
-
-        totalanswermap.remove(userId);
-    }
 
     // METHODS NOT USED
 

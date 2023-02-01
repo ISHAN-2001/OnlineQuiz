@@ -1,6 +1,7 @@
 package UserQuizManagement.demoUserQuiz.Controller;
 
 
+import UserQuizManagement.demoUserQuiz.CustomException;
 import UserQuizManagement.demoUserQuiz.DTO.QuestionDTO;
 import UserQuizManagement.demoUserQuiz.Entity.Questions;
 import UserQuizManagement.demoUserQuiz.Service.QuestionService;
@@ -40,19 +41,19 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-    @GetMapping(path="/checkanswers/{userId}/{questionId}/{givenAnswer}")
-    public int checkAnswers(@PathVariable Long userId,@PathVariable Long questionId,@PathVariable int givenAnswer){
+    @GetMapping(path="/checkanswers/{questionId}/{givenAnswer}")
+    public int checkAnswers(@PathVariable Long questionId,@PathVariable int givenAnswer){
 
-        int marks = questionService.checkAnswer(userId,questionId,givenAnswer);
+        int marks = questionService.checkAnswer(questionId,givenAnswer);
 
         return marks;
 
     }
 
-    @GetMapping(path="/getquestions/{subject_id}/{offset}")
-    public QuestionDTO getQuestions(@PathVariable Long subject_id,@PathVariable int offset ){
+    @GetMapping(path="/getquestions/{userId}/{subject_id}")
+    public QuestionDTO getQuestions(@PathVariable Long userId,@PathVariable Long subject_id ) throws CustomException {
 
-        Questions question= questionService.generateQuestions(subject_id,offset);
+        Questions question= questionService.generateQuestions(userId,subject_id);
         QuestionDTO questionDTO = new QuestionDTO(question);
         return questionDTO;
     }
@@ -87,11 +88,6 @@ public class QuestionController {
 
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
-    }
-
-    @GetMapping("/endquiz/{userId}")
-    public void endQuiz(@PathVariable Long userId){
-        questionService.endthisQuiz(userId);
     }
 
     /* NOT USED...
