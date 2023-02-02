@@ -6,6 +6,8 @@ import UserQuizManagement.demoUserQuiz.DTO.QuestionDTO;
 import UserQuizManagement.demoUserQuiz.Entity.Questions;
 import UserQuizManagement.demoUserQuiz.Service.QuestionService;
 
+import UserQuizManagement.demoUserQuiz.Utils.QuestionHelper;
+import UserQuizManagement.demoUserQuiz.Utils.UserSubjectHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.simple.parser.ParseException;
@@ -41,10 +43,10 @@ public class QuestionController {
         return questionService.getAllQuestions();
     }
 
-    @GetMapping(path="/checkanswers/{questionId}/{givenAnswer}")
-    public int checkAnswers(@PathVariable Long questionId,@PathVariable int givenAnswer){
+    @GetMapping(path="/checkanswers/{userId}/{questionId}/{givenAnswer}")
+    public int checkAnswers(@PathVariable Long userId,@PathVariable Long questionId,@PathVariable int givenAnswer){
 
-        int marks = questionService.checkAnswer(questionId,givenAnswer);
+        int marks = questionService.checkAnswer(userId,questionId,givenAnswer);
 
         return marks;
 
@@ -90,21 +92,14 @@ public class QuestionController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("OK");
     }
 
-    /* NOT USED...
-    @GetMapping(path="/checkanswers")
-    public int checkAnswers(){
+    @GetMapping("/endTest/{userId}/{subjectId}")
+    public void endTest(@PathVariable Long userId,@PathVariable Long subjectId){
+        UserSubjectHelper keyObject= new UserSubjectHelper(userId,subjectId);
+        QuestionHelper valueObject = questionService.questionMap.get(keyObject);
 
-        Long user_id=null;
-        List<Responces> res = new ArrayList<>();
-
-        res.add(new Responces(8l,2));
-        res.add(new Responces(9l,3));
-        res.add(new Responces(10l,4));
-
-
-        int marks =questionService.checkAnswer(user_id,res);
-        return marks;
-    }*/
+        int score = valueObject.getScore();
+        //userRepository.saveScore(userId,subjectId,score)
+    }
 
 
 
