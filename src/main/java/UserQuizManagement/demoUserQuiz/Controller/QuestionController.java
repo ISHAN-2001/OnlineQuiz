@@ -6,6 +6,7 @@ import UserQuizManagement.demoUserQuiz.DTO.QuestionDTO;
 import UserQuizManagement.demoUserQuiz.Entity.Questions;
 import UserQuizManagement.demoUserQuiz.Service.QuestionService;
 
+import UserQuizManagement.demoUserQuiz.Service.UserService;
 import UserQuizManagement.demoUserQuiz.Utils.QuestionHelper;
 import UserQuizManagement.demoUserQuiz.Utils.UserSubjectHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -27,6 +28,9 @@ public class QuestionController {
 
     @Autowired
     private QuestionService questionService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping
     public void addQuestion(@RequestBody Questions question){
@@ -99,6 +103,9 @@ public class QuestionController {
 
         int score = valueObject.getScore();
 
+        System.out.println(score);
+
+        //userService.submitScore(userId,subjectId,score);
         //userRepository.saveScore(userId,subjectId,score)
     }
 
