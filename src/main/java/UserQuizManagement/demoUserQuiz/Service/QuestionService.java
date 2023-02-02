@@ -76,7 +76,8 @@ public class QuestionService {
 
         UserSubjectHelper userSubject = new UserSubjectHelper(userId,subjectId);
 
-
+        String errormessage="";
+        int error=0;
 
         if(!questionMap.containsKey(userSubject)){ //user-subject not present
             int totalQuestions = questionRepository.countBysubjectId(subjectId);
@@ -84,8 +85,8 @@ public class QuestionService {
             questionMap.put(userSubject,questionHelper);
 
             if(totalQuestions<10){
-                questionMap.remove(userSubject);
-                throw new CustomException("Number of questions should be atleast 10");
+                error=1;
+                errormessage="Number of questions in subject should be more than 10";
             }
         }
         else{  // user-subeject present
@@ -93,12 +94,15 @@ public class QuestionService {
             questionHelper.setQuestionIndex(questionHelper.getQuestionIndex()+1);
             questionMap.put(userSubject,questionHelper);
             if(questionHelper.getQuestionIndex()>=10){
-
-                System.out.println("Total Marks="+questionHelper.getScore());
-                questionMap.remove(userSubject);
-                throw new CustomException("Attempted more than 10 questions");
+                error=2;
+                errormessage="Attempted more than 10 questions, Total marks= "+questionHelper.getScore();
             }
         }
+        if(error!=0){
+            questionMap.remove(userSubject);
+            throw new CustomException(errormessage);
+        }
+
 
         System.out.println("INSIDE FUNCTION");
 
