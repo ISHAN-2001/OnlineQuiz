@@ -106,7 +106,6 @@ public class QuestionController {
         System.out.println(score);
 
         //userService.submitScore(userId,subjectId,score);
-        //userRepository.saveScore(userId,subjectId,score)
     }
 
 
